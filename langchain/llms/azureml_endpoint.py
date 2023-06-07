@@ -33,7 +33,7 @@ class AzureMLEndpointClient(object):
         # The azureml-model-deployment header will force the request to go to a specific deployment.
         # Remove this header to have the request observe the endpoint traffic rules
 
-        headers = {'Content-Type': 'application/json', 'Authorization': ('Bearer ' + api_key), 'azureml-model-deployment': "matthew-gpt-2"}
+        headers = {'Content-Type': 'application/json', 'Authorization': ('Bearer ' + api_key), 'azureml-model-deployment': self.deployment_name}
         
         req = urllib.request.Request(url, body, headers)
         try:
@@ -123,7 +123,6 @@ class AzureMLModel(LLM, BaseModel):
         # body = {"inputs": prompt, "parameters": _model_kwargs}
         body = {"inputs": {"input_string": [prompt]}}
         endpoint_response = self.http_client.call(body)
-        print("Response:", endpoint_response)
         response = json.loads(endpoint_response)
         
         # TODO: Add error handling
