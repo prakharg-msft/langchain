@@ -42,6 +42,7 @@ class AzureMLEndpointClient(object):
             result = response.read()
         except urllib.error.HTTPError as error:
             print("The request failed with status code: " + str(error.code))
+            result = str(error)
         except Exception as e:
             print("Calling Azure Managed Online endpoint failed!")
             result = str(e)
@@ -120,7 +121,7 @@ class AzureMLModel(LLM, BaseModel):
         """
         _model_kwargs = self.model_kwargs or {}
 
-        # body = {"inputs": prompt, "parameters": _model_kwargs}
+        # TODO: Add _model_kwargs to body
         body = {"inputs": {"input_string": [prompt]}}
         endpoint_response = self.http_client.call(body)
         response = json.loads(endpoint_response)
