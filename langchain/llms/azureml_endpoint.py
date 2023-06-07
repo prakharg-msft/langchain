@@ -1,6 +1,6 @@
 """Wrapper around AzureML Managed Online Endpoint API."""
 from typing import Any, Dict, List, Mapping, Optional
-import urllib
+import urllib.request
 
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.llms.base import LLM
@@ -21,6 +21,7 @@ class AzureMLEndpointClient(object):
 
     def call(self, data):
         """call."""
+        
         body = str.encode(json.dumps(data))
 
         url = self.endpoint_url
@@ -31,8 +32,9 @@ class AzureMLEndpointClient(object):
 
         # The azureml-model-deployment header will force the request to go to a specific deployment.
         # Remove this header to have the request observe the endpoint traffic rules
-        headers = {'Content-Type': 'application/json', 'Authorization': ('Bearer ' + api_key), 'azureml-model-deployment': self.deployment_name}
 
+        headers = {'Content-Type': 'application/json', 'Authorization': ('Bearer ' + api_key), 'azureml-model-deployment': "matthew-gpt-2"}
+        
         req = urllib.request.Request(url, body, headers)
         try:
             response = urllib.request.urlopen(req, timeout=50)
@@ -88,10 +90,9 @@ class AzureMLModel(LLM, BaseModel):
         """Get the identifying parameters."""
         _model_kwargs = self.model_kwargs or {}
         return {
-            **{"endpoint_name": self.endpoint_name},
+            **{"deployment_name": self.deployment_name},
             **{"model_kwargs": _model_kwargs},
         }
-
     @property
     def _llm_type(self) -> str:
         """Return type of llm."""
@@ -119,9 +120,11 @@ class AzureMLModel(LLM, BaseModel):
         """
         _model_kwargs = self.model_kwargs or {}
 
-        body = {"inputs": prompt, "parameters": _model_kwargs}
+        # body = {"inputs": prompt, "parameters": _model_kwargs}
+        body = {"inputs": {"input_string": [prompt]}}
         endpoint_response = self.http_client.call(body)
+        print("Response:", endpoint_response)
         response = json.loads(endpoint_response)
         
         # TODO: Add error handling
-        return response
+        return response[0]["0"] # return first response
