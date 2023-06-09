@@ -61,14 +61,16 @@ class AzureMLModel(LLM, BaseModel):
     """
 
     endpoint_url: str = None
-    """ URL of prexisting endpoint """
+    """ URL of prexisting Endpoint """
     
     endpoint_api_key: str = None
     """ Authentication Key for Endpoint"""
     
     deployment_name: str = None
-    """ Authentication Key for Endpoint"""
+    """ Deployment Name for Endpoint"""
     
+    temperature: float = 0.5
+
     http_client: Any = None  #: :meta private:
     
     model_kwargs: Optional[dict] = None
@@ -121,8 +123,8 @@ class AzureMLModel(LLM, BaseModel):
         """
         _model_kwargs = self.model_kwargs or {}
 
-        # TODO: Add _model_kwargs to body
-        body = {"inputs": {"input_string": [prompt]}}
+        # TODO: Adjust how input is formatted according to the model
+        body = {"inputs": {"input_string": [prompt]}, "parameters": _model_kwargs}
         endpoint_response = self.http_client.call(body)
         response = json.loads(endpoint_response)
         
