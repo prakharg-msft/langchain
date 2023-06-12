@@ -90,16 +90,30 @@ class AzureMLModel(LLM, BaseModel):
         http_client = AzureMLEndpointClient(endpoint_url, endpoint_key, deployment_name)
         return http_client
 
-    def format_body(self, prompt, parameters) -> Dict:
+    def format_body(self, prompt, parameters) -> Mapping[str, Any]:
+        """Format the body of the request according to the catalog type"""
         if self.catalog_type == "open_source":
             return {"inputs": {"input_string": [prompt]}, "parameters": parameters} 
         elif self.catalog_type == "hugging_face":
-            options = {"use_cache": parameters["use_cache"] or True, "wait_for_model": parameters["wait_for_model"] or False}
-            parameters.pop("use_cache")
-            parameters.pop("wait_for_model")
-            {"inputs": [prompt], "parameters": parameters, "options": options}
+            # HuggingFace default values for options
+            options = {"use_cache": True, "wait_for_model": False}
+            if "use_cache" in parameters:
+                options["use_cache"] = parameters["use_cache"]
+                parameters.pop("use_cache")
+            if "wait_for_model" in parameters:
+                options["wait_for_model"] = parameters["wait_for_model"]
+                parameters.pop("wait_for_model")
+            return {"inputs": [prompt], "parameters": parameters, "options": options}
         else:
             return None
+        
+    def format_response(self, response) -> str:
+        """Get the first response"""
+        responses = response[0] if self.catalog_type == "open_source" else response[0][0]
+        for _, resp in responses.items():
+            return resp
+        
+        return None
     @property
     def _identifying_params(self) -> Mapping[str, Any]:
         """Get the identifying parameters."""
@@ -137,6 +151,6 @@ class AzureMLModel(LLM, BaseModel):
 
         body = self.format_body(prompt, _model_kwargs)
         endpoint_response = self.http_client.call(body)
-        response = json.loads(endpoint_response)
+        response = self.format_response(json.loads(endpoint_response))
         # TODO: Add error handling
-        return response[0]["0"] if self.catalog_type == "open_source" else response[0][0]["generated_text"]
+        return response
