@@ -91,9 +91,15 @@ class AzureMLModel(LLM, BaseModel):
         return http_client
 
     def format_body(self, prompt, parameters) -> Dict:
-        return ({"inputs": {"input_string": [prompt]}, "parameters": parameters} 
-                if self.catalog_type == "open_source"
-                else {"inputs": [prompt], "parameters": parameters}) 
+        if self.catalog_type == "open_source":
+            return {"inputs": {"input_string": [prompt]}, "parameters": parameters} 
+        elif self.catalog_type == "hugging_face":
+            options = {"use_cache": parameters["use_cache"] or True, "wait_for_model": parameters["wait_for_model"] or False}
+            parameters.pop("use_cache")
+            parameters.pop("wait_for_model")
+            {"inputs": [prompt], "parameters": parameters, "options": options}
+        else:
+            return None
     @property
     def _identifying_params(self) -> Mapping[str, Any]:
         """Get the identifying parameters."""
