@@ -18,7 +18,7 @@ class AzureMLEndpointClient(object):
         self.endpoint_url = endpoint_url
         self.endpoint_api_key = endpoint_api_key
         self.deployment_name = deployment_name
-
+    
     def call(self, data):
         """call."""
         
@@ -46,6 +46,7 @@ class AzureMLEndpointClient(object):
         except Exception as e:
             print("Calling Azure Managed Online endpoint failed!")
             result = str(e)
+            print(result)
         return result
 
 
@@ -69,6 +70,8 @@ class AzureMLModel(LLM, BaseModel):
     deployment_name: str = None
     """ Deployment Name for Endpoint"""
 
+    catalog_type: str = None
+    """ Model Catalog Type: hugging_face or open_source """
     http_client: Any = None  #: :meta private:
     
     model_kwargs: Optional[dict] = None
@@ -86,6 +89,10 @@ class AzureMLModel(LLM, BaseModel):
         http_client = AzureMLEndpointClient(endpoint_url, endpoint_key, deployment_name)
         return http_client
 
+    def format_body(self, prompt, parameters) -> Dict:
+        return ({"inputs": {"input_string": [prompt]}, "parameters": parameters} 
+                if self.catalog_type == "open_source"
+                else {"inputs": [prompt], "parameters": parameters}) 
     @property
     def _identifying_params(self) -> Mapping[str, Any]:
         """Get the identifying parameters."""
@@ -122,9 +129,8 @@ class AzureMLModel(LLM, BaseModel):
         _model_kwargs = self.model_kwargs or {}
 
         # TODO: Adjust how input is formatted according to the model
-        body = {"inputs": {"input_string": [prompt]}, "parameters": _model_kwargs}
+        body = self.format_body(prompt, _model_kwargs)
         endpoint_response = self.http_client.call(body)
         response = json.loads(endpoint_response)
-        
         # TODO: Add error handling
-        return response[0]["0"] # return first response
+        return response[0]["0"] if self.catalog_type == "open_source" else response[0][0]["generated_text"]
