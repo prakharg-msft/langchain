@@ -38,7 +38,6 @@ class AzureMLEndpointClient(object):
         req = urllib.request.Request(url, body, headers)
         try:
             response = urllib.request.urlopen(req, timeout=50)
-
             result = response.read()
         except urllib.error.HTTPError as error:
             print("The request failed with status code: " + str(error.code))
@@ -46,7 +45,6 @@ class AzureMLEndpointClient(object):
         except Exception as e:
             print("Calling Azure Managed Online endpoint failed!")
             result = str(e)
-            print(result)
         return result
 
 
@@ -58,7 +56,9 @@ class AzureMLModel(LLM, BaseModel):
 
             auzre_llm = AzureMLModel(
                 endpoint_url="https://<your-endpoint>.<your_region>.inference.ml.azure.com/score",
-                endpoint_api_key="my-api-key")
+                endpoint_api_key="my-api-key",
+                deployment_name="my-deployment-name",
+                catalog_type="my-catalog-type")
     """
 
     endpoint_url: str = None
@@ -72,6 +72,7 @@ class AzureMLModel(LLM, BaseModel):
 
     catalog_type: str = None
     """ Model Catalog Type: hugging_face or open_source """
+
     http_client: Any = None  #: :meta private:
     
     model_kwargs: Optional[dict] = None
@@ -128,7 +129,6 @@ class AzureMLModel(LLM, BaseModel):
         """
         _model_kwargs = self.model_kwargs or {}
 
-        # TODO: Adjust how input is formatted according to the model
         body = self.format_body(prompt, _model_kwargs)
         endpoint_response = self.http_client.call(body)
         response = json.loads(endpoint_response)
