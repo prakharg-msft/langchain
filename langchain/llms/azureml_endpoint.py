@@ -8,6 +8,8 @@ from langchain.utils import get_from_dict_or_env
 from pydantic import BaseModel, validator
 import json
 
+OPEN_SOURCE = "open_source"
+HUGGING_FACE = "hugging_face"
 
 #TODO: Use python SDK instead of urllib
 class AzureMLEndpointClient(object):
@@ -92,9 +94,9 @@ class AzureMLModel(LLM, BaseModel):
 
     def format_body(self, prompt, parameters) -> Mapping[str, Any]:
         """Format the body of the request according to the catalog type"""
-        if self.catalog_type == "open_source":
+        if self.catalog_type == OPEN_SOURCE:
             return {"inputs": {"input_string": [prompt]}, "parameters": parameters} 
-        elif self.catalog_type == "hugging_face":
+        elif self.catalog_type == HUGGING_FACE:
             # HuggingFace default values for options
             options = {"use_cache": True, "wait_for_model": False}
             if "use_cache" in parameters:
@@ -109,7 +111,7 @@ class AzureMLModel(LLM, BaseModel):
         
     def format_response(self, response) -> str:
         """Get the first response"""
-        responses = response[0] if self.catalog_type == "open_source" else response[0][0]
+        responses = response[0] if self.catalog_type == OPEN_SOURCE else response[0][0]
         for _, resp in responses.items():
             return resp
         
