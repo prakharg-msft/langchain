@@ -68,8 +68,6 @@ class AzureMLModel(LLM, BaseModel):
     
     deployment_name: str = None
     """ Deployment Name for Endpoint"""
-    
-    temperature: float = 0.5
 
     http_client: Any = None  #: :meta private:
     
