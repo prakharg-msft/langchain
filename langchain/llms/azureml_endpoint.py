@@ -94,6 +94,7 @@ class AzureMLModel(LLM, BaseModel):
 
     def format_body(self, prompt, parameters) -> Mapping[str, Any]:
         """Format the body of the request according to the catalog type"""
+        # TODO: Add support for dolly-v2-12b input format
         if self.catalog_type == OPEN_SOURCE:
             return {"inputs": {"input_string": [prompt]}, "parameters": parameters} 
         elif self.catalog_type == HUGGING_FACE:
@@ -111,6 +112,7 @@ class AzureMLModel(LLM, BaseModel):
         
     def format_response(self, response) -> str:
         """Get the first response"""
+        # TODO: Add support for dolly-v2-12b output
         responses = response[0] if self.catalog_type == OPEN_SOURCE else response[0][0]
         for _, resp in responses.items():
             return resp
