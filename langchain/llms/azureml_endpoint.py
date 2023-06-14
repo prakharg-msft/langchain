@@ -89,6 +89,7 @@ class AzureMLModel(LLM, BaseModel):
         )
         endpoint_url = values["endpoint_url"]
         deployment_name = values["deployment_name"]
+        catalog_type = values["catalog_type"]
         http_client = AzureMLEndpointClient(endpoint_url, endpoint_key, deployment_name)
         return http_client
 
