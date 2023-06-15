@@ -2,14 +2,13 @@
 
 from langchain.llms.azureml_endpoint import LLMBodyHandler, AzureMLModel
 from langchain.llms.loading import load_llm
-from pydantic import ValidationError
 
 import pytest
 import json
 import os
     
 def test_oss_call() -> None:
-    """Test valid call to Open Source Foundation Model"""
+    """Test valid call to Open Source Foundation Model."""
     
     class OSSBodyHandler(LLMBodyHandler):
         content_type = "application/json"
@@ -34,7 +33,7 @@ def test_oss_call() -> None:
     
 
 def test_hf_call() -> None:
-    """Test valid call to HuggingFace Foundation Model"""
+    """Test valid call to HuggingFace Foundation Model."""
     class BodyHandler(LLMBodyHandler):
                 content_type = "application/json"
                 accepts = "application/json"
@@ -57,7 +56,7 @@ def test_hf_call() -> None:
     assert isinstance(output, str)
 
 def test_dolly_call() -> None:
-    """Test valid call to dolly-v2-12b"""
+    """Test valid call to dolly-v2-12b."""
     class BodyHandler(LLMBodyHandler):
                 content_type = "application/json"
                 accepts = "application/json"
@@ -80,6 +79,7 @@ def test_dolly_call() -> None:
     assert isinstance(output, str)
 
 def test_missing_body_handler() -> None:
+    """Test AzureML LLM without a body_handler attribute"""
     with pytest.raises(AttributeError):
         llm = AzureMLModel(
             endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
@@ -89,6 +89,7 @@ def test_missing_body_handler() -> None:
         llm("Foo")
 
 def test_invalid_request_format() -> None:
+    """Test invalid request formatter."""
     class BodyHandler(LLMBodyHandler):
                 content_type = "application/json"
                 accepts = "application/json"
@@ -120,4 +121,3 @@ def test_saving_loading_llm(tmp_path) -> None:
     loaded_llm = load_llm(tmp_path / "azureml.yaml")
 
     assert loaded_llm == llm
-
