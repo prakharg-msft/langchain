@@ -19,10 +19,8 @@ class AzureMLEndpointClient(object):
         self.endpoint_api_key = endpoint_api_key
         self.deployment_name = deployment_name
     
-    def call(self, data):
+    def call(self, body):
         """call."""
-        
-        body = str.encode(json.dumps(data))
 
         url = self.endpoint_url
         # Replace this with the primary/secondary key or AMLToken for the endpoint
@@ -59,14 +57,14 @@ class BodyHandlerBase():
             class BodyHandler(BodyHandlerBase):
                 content_type = "application/json"
                 accepts = "application/json"
-
+                
                 def format_request_payload(self, prompt, model_kwargs) -> bytes:
-                    input_str = json.dumps({inputs: prompt, parameters: **model_kwargs})
+                    input_str = json.dumps({"inputs": {"input_string": [prompt]}, "parameters": model_kwargs})
                     return str.encode(input_str)
 
-                def format_response_payload(self, output) -> Any:
-                    response_json = json.loads(str.decode(output.read()))
-                    return response_json[0]["generated_text"]
+                def format_response_payload(self, output) -> str:
+                    response_json = json.loads(output)
+                    return response_json[0]["0"]
     """
     content_type: Optional[str] = "text/plain"
     """The MIME type of the input data passed to the endpoint"""
@@ -133,14 +131,14 @@ class AzureMLModel(LLM, BaseModel):
             class BodyHandler(LLMBodyHandler):
                 content_type = "application/json"
                 accepts = "application/json"
-
+                
                 def format_request_payload(self, prompt, model_kwargs) -> bytes:
-                    input_str = json.dumps({inputs: prompt, parameters: **model_kwargs})
+                    input_str = json.dumps({"inputs": {"input_string": [prompt]}, "parameters": model_kwargs})
                     return str.encode(input_str)
 
-                def format_response_payload(self, output) -> Any:
-                    response_json = json.loads(str.decode(output.read()))
-                    return response_json[0]["generated_text"]
+                def format_response_payload(self, output) -> str:
+                    response_json = json.loads(output)
+                    return response_json[0]["0"]
                     
     """
 
@@ -197,6 +195,6 @@ class AzureMLModel(LLM, BaseModel):
 
         body = self.body_handler.format_request_payload(prompt, _model_kwargs)
         endpoint_response = self.http_client.call(body)
-        response = self.body_handler.format_request_payload(endpoint_response)
+        response = self.body_handler.format_response_payload(endpoint_response)
         # TODO: Add error handling
         return response
