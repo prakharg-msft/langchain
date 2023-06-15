@@ -146,7 +146,7 @@ class AzureMLModel(LLM, BaseModel):
                     return response_json[0]["generated_text"]
                     
     """
-    
+
     model_kwargs: Optional[dict] = None
     """Key word arguments to pass to the model."""
 
@@ -159,36 +159,10 @@ class AzureMLModel(LLM, BaseModel):
         )
         endpoint_url = values["endpoint_url"]
         deployment_name = values["deployment_name"]
-        catalog_type = values["catalog_type"]
         http_client = AzureMLEndpointClient(endpoint_url, endpoint_key, deployment_name)
         return http_client
 
-    def format_body(self, prompt, parameters) -> Mapping[str, Any]:
-        """Format the body of the request according to the catalog type"""
-        # TODO: Add support for dolly-v2-12b input format
-        if self.catalog_type == OPEN_SOURCE:
-            return {"inputs": {"input_string": [prompt]}, "parameters": parameters} 
-        elif self.catalog_type == HUGGING_FACE:
-            # HuggingFace default values for options
-            options = {"use_cache": True, "wait_for_model": False}
-            if "use_cache" in parameters:
-                options["use_cache"] = parameters["use_cache"]
-                parameters.pop("use_cache")
-            if "wait_for_model" in parameters:
-                options["wait_for_model"] = parameters["wait_for_model"]
-                parameters.pop("wait_for_model")
-            return {"inputs": [prompt], "parameters": parameters, "options": options}
-        else:
-            return None
-        
-    def format_response(self, response) -> str:
-        """Get the first response"""
-        # TODO: Add support for dolly-v2-12b output
-        responses = response[0] if self.catalog_type == OPEN_SOURCE else response[0][0]
-        for _, resp in responses.items():
-            return resp
-        
-        return None
+    
     @property
     def _identifying_params(self) -> Mapping[str, Any]:
         """Get the identifying parameters."""
@@ -224,8 +198,8 @@ class AzureMLModel(LLM, BaseModel):
         """
         _model_kwargs = self.model_kwargs or {}
 
-        body = self.format_body(prompt, _model_kwargs)
+        body = self.body_handler.format_request_payload(prompt, _model_kwargs)
         endpoint_response = self.http_client.call(body)
-        response = self.format_response(json.loads(endpoint_response))
+        response = self.body_handler.format_request_payload(endpoint_response)
         # TODO: Add error handling
         return response
