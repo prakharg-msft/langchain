@@ -1,4 +1,5 @@
 """Wrapper around AzureML Managed Online Endpoint API."""
+from abc import abstractmethod
 from typing import Any, Dict, List, Mapping, Optional
 import urllib.request
 
@@ -49,6 +50,49 @@ class AzureMLEndpointClient(object):
             result = str(e)
         return result
 
+class BodyHandlerBase():
+    """A handler class to transform input from LLM to
+    a format that AzureML endpoint expects.
+    """
+
+    """
+    Example:
+        .. code-block:: python
+
+            class BodyHandler(BodyHandlerBase):
+                content_type = "application/json"
+                accepts = "application/json"
+
+                def format_request_payload(self, prompt, model_kwargs) -> bytes:
+                    input_str = json.dumps({inputs: prompt, parameters: **model_kwargs})
+                    return str.encode(input_str)
+
+                def format_response_payload(self, output) -> Any:
+                    response_json = json.loads(str.decode(output.read()))
+                    return response_json[0]["generated_text"]
+    """
+    content_type: Optional[str] = "text/plain"
+    """The MIME type of the input data passed to the endpoint"""
+    
+    accepts: Optional[str] = "text/plain"
+    """The MIME type of the response data returned form the endpoint"""
+
+    @abstractmethod
+    def format_request_payload(self, prompt, model_kwargs) -> bytes:
+        """Formats the request body according to the input schema of 
+        the model. Returns bytes or seekable file like object in the
+        format specified in the content_type request header.
+        """
+
+    @abstractmethod
+    def format_response_payload(self, output) -> Any:
+        """Formats the response body according to the output
+        schema of the model. Returns the data type that is
+        received from the response.
+        """
+     
+class LLMBodyHandler(BodyHandlerBase):
+    """Content handler for LLM class."""
 
 class AzureMLModel(LLM, BaseModel):
     """Wrapper around Azure ML Hosted models using Managed Online Endpoints.
@@ -73,9 +117,35 @@ class AzureMLModel(LLM, BaseModel):
     """ Deployment Name for Endpoint"""
 
     catalog_type: str = None
-    """ Model Catalog Type: hugging_face or open_source """
+    """ Model Catalog Type: hugging_face or open_source"""
 
     http_client: Any = None  #: :meta private:
+    
+    body_handler: LLMBodyHandler
+    """The body handler class that provides an input and output
+    transform function to handle formats between the LLM and
+    the endpoint"""
+
+
+    """
+        Example:
+            .. code-block:: python
+
+            from langchain.llms.azureml_endpoint import LLMBodyHandler
+
+            class BodyHandler(LLMBodyHandler):
+                content_type = "application/json"
+                accepts = "application/json"
+
+                def format_request_payload(self, prompt, model_kwargs) -> bytes:
+                    input_str = json.dumps({inputs: prompt, parameters: **model_kwargs})
+                    return str.encode(input_str)
+
+                def format_response_payload(self, output) -> Any:
+                    response_json = json.loads(str.decode(output.read()))
+                    return response_json[0]["generated_text"]
+                    
+    """
     
     model_kwargs: Optional[dict] = None
     """Key word arguments to pass to the model."""
