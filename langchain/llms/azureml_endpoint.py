@@ -9,9 +9,6 @@ from langchain.utils import get_from_dict_or_env
 from pydantic import BaseModel, validator
 import json
 
-OPEN_SOURCE = "open_source"
-HUGGING_FACE = "hugging_face"
-
 #TODO: Use python SDK instead of urllib
 class AzureMLEndpointClient(object):
     """Wrapper around AzureML Managed Online Endpoint Client."""
