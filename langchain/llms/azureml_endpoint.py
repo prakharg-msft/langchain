@@ -45,7 +45,7 @@ class AzureMLEndpointClient(object):
             result = str(e)
         return result
 
-class BodyHandlerBase():
+class ContentFormatterBase():
     """A handler class to transform input from LLM to
     a format that AzureML endpoint expects.
     """
@@ -54,7 +54,7 @@ class BodyHandlerBase():
     Example:
         .. code-block:: python
 
-            class BodyHandler(BodyHandlerBase):
+            class ContentFormatter(ContentFormatterBase):
                 content_type = "application/json"
                 accepts = "application/json"
                 
@@ -86,8 +86,47 @@ class BodyHandlerBase():
         received from the response.
         """
      
-class LLMBodyHandler(BodyHandlerBase):
+class LLMContentFormatter(ContentFormatterBase):
     """Content handler for LLM class."""
+
+class OSSContentFormatter(LLMContentFormatter):
+    """Content handler for LLMs from the OSS catalog."""
+    content_type = "application/json"
+    accepts = "application/json"
+    
+    def format_request_payload(self, prompt, model_kwargs) -> bytes:
+        input_str = json.dumps({"inputs": {"input_string": [prompt]}, "parameters": model_kwargs})
+        return str.encode(input_str)
+
+    def format_response_payload(self, output) -> str:
+        response_json = json.loads(output)
+        return response_json[0]["0"]
+    
+class HFContentFormatter(LLMContentFormatter):
+    """Content handler for LLMs from the HuggingFace catalog."""
+    content_type = "application/json"
+    accepts = "application/json"
+    
+    def format_request_payload(self, prompt, model_kwargs) -> bytes:
+        input_str = json.dumps({"inputs":  [prompt], "parameters": model_kwargs})
+        return str.encode(input_str)
+
+    def format_response_payload(self, output) -> str:
+        response_json = json.loads(output)
+        return response_json[0][0]["generated_text"]
+
+class DollyContentFormatter(LLMContentFormatter):
+    """Content handler for the Dolly-v2-12b model"""
+    content_type = "application/json"
+    accepts = "application/json"
+    
+    def format_request_payload(self, prompt, model_kwargs) -> bytes:
+        input_str = json.dumps({"input_data": {"input_string": [prompt]}, "parameters": model_kwargs})
+        return str.encode(input_str)
+
+    def format_response_payload(self, output) -> str:
+        response_json = json.loads(output)
+        return response_json[0]
 
 class AzureMLModel(LLM, BaseModel):
     """Wrapper around Azure ML Hosted models using Managed Online Endpoints.
@@ -113,7 +152,7 @@ class AzureMLModel(LLM, BaseModel):
 
     http_client: Any = None  #: :meta private:
     
-    body_handler: LLMBodyHandler = None
+    body_handler: LLMContentFormatter = None
     """The body handler class that provides an input and output
     transform function to handle formats between the LLM and
     the endpoint"""

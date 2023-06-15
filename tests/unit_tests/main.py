@@ -1,9 +1,9 @@
-from langchain.llms.azureml_endpoint import AzureMLModel, LLMBodyHandler
+from langchain.llms.azureml_endpoint import AzureMLModel, LLMContentFormatter
 from langchain.llms.loading import load_llm
 import json
 import os
 
-class OSSBodyHandler(LLMBodyHandler):
+class OSSBodyHandler(LLMContentFormatter):
     content_type = "application/json"
     accepts = "application/json"
     
