@@ -40,6 +40,7 @@ class AzureMLEndpointClient(object):
         except urllib.error.HTTPError as error:
             print("The request failed with status code: " + str(error.code))
             result = str(error)
+            print(result)
         except Exception as e:
             print("Calling Azure Managed Online endpoint failed!")
             result = str(e)
@@ -99,7 +100,7 @@ class AzureMLModel(LLM, BaseModel):
                 endpoint_url="https://<your-endpoint>.<your_region>.inference.ml.azure.com/score",
                 endpoint_api_key="my-api-key",
                 deployment_name="my-deployment-name",
-                catalog_type="my-catalog-type")
+                body_handler=body_handler)
     """
 
     endpoint_url: str = None
@@ -110,9 +111,6 @@ class AzureMLModel(LLM, BaseModel):
     
     deployment_name: str = None
     """ Deployment Name for Endpoint"""
-
-    catalog_type: str = None
-    """ Model Catalog Type: hugging_face or open_source"""
 
     http_client: Any = None  #: :meta private:
     
