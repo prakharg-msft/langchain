@@ -16,7 +16,6 @@ class OSSBodyHandler(LLMBodyHandler):
         return response_json[0]["0"]
 
 azure_llm = AzureMLModel(
-    # endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
     endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
     endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
     deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
