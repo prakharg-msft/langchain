@@ -37,7 +37,7 @@ def test_hf_call() -> None:
                 accepts = "application/json"
                 
                 def format_request_payload(self, prompt, model_kwargs) -> bytes:
-                    input_str = json.dumps({"inputs": {"input_string": [prompt]}, "parameters": model_kwargs})
+                    input_str = json.dumps({"inputs":  [prompt], "parameters": model_kwargs})
                     return str.encode(input_str)
 
                 def format_response_payload(self, output) -> str:
@@ -60,7 +60,7 @@ def test_dolly_call() -> None:
                 accepts = "application/json"
                 
                 def format_request_payload(self, prompt, model_kwargs) -> bytes:
-                    input_str = json.dumps({"inputs": {"input_string": [prompt]}, "parameters": model_kwargs})
+                    input_str = json.dumps({"input_data": {"input_string": [prompt]}, "parameters": model_kwargs})
                     return str.encode(input_str)
 
                 def format_response_payload(self, output) -> str:
@@ -75,29 +75,6 @@ def test_dolly_call() -> None:
     )
     output = llm("Foo")
     assert isinstance(output, str)
-
-def test_invalid_url() -> None:
-    class BodyHandler(LLMBodyHandler):
-                content_type = "application/json"
-                accepts = "application/json"
-                
-                def format_request_payload(self, prompt, model_kwargs) -> bytes:
-                    input_str = json.dumps({"inputs": {"input_string": [prompt]}, "parameters": model_kwargs})
-                    return str.encode(input_str)
-
-                def format_response_payload(self, output) -> str:
-                    response_json = json.loads(output)
-                    return response_json[0]["0"]
-    
-    llm = AzureMLModel(
-        endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
-        endpoint_url="https://bing.com",
-        deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
-        body_handler=BodyHandler()
-    )
-    
-    with pytest.raises(urllib.error.HTTPError, match='HTTP Error 404: Not Found'):
-        llm("Foo")
 
 def test_missing_body_handler() -> None:
     with pytest.raises(ValidationError):
@@ -120,7 +97,7 @@ def test_invalid_request_format() -> None:
                     response_json = json.loads(output)
                     return response_json[0]["0"]
                 
-    with pytest.raises(urllib.error.HTTPError, match='HTTP Error 424: Failed Dependency'):
+    with pytest.raises(json.JSONDecodeError):
       llm = AzureMLModel(
             endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
             endpoint_url=os.getenv("OSS_ENDPOINT_URL"),

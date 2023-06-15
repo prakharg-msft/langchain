@@ -40,7 +40,6 @@ class AzureMLEndpointClient(object):
         except urllib.error.HTTPError as error:
             print("The request failed with status code: " + str(error.code))
             result = str(error)
-            print(result)
         except Exception as e:
             print("Calling Azure Managed Online endpoint failed!")
             result = str(e)
