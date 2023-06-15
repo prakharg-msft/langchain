@@ -152,7 +152,7 @@ class AzureMLModel(LLM, BaseModel):
 
     http_client: Any = None  #: :meta private:
     
-    body_handler: LLMContentFormatter = None
+    content_formatter: LLMContentFormatter = None
     """The body handler class that provides an input and output
     transform function to handle formats between the LLM and
     the endpoint"""
@@ -229,8 +229,8 @@ class AzureMLModel(LLM, BaseModel):
         """
         _model_kwargs = self.model_kwargs or {}
 
-        body = self.body_handler.format_request_payload(prompt, _model_kwargs)
+        body = self.content_formatter.format_request_payload(prompt, _model_kwargs)
         endpoint_response = self.http_client.call(body)
-        response = self.body_handler.format_response_payload(endpoint_response)
+        response = self.content_formatter.format_response_payload(endpoint_response)
         # TODO: Add error handling
         return response

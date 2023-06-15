@@ -13,7 +13,7 @@ def test_oss_call() -> None:
         endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
         endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
         deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
-        body_handler=OSSContentFormatter()
+        content_formatter=OSSContentFormatter()
     )
     output = llm("Foo")
     assert isinstance(output, str)
@@ -24,7 +24,7 @@ def test_hf_call() -> None:
         endpoint_api_key=os.getenv("HF_ENDPOINT_API_KEY"),
         endpoint_url=os.getenv("HF_ENDPOINT_URL"),
         deployment_name=os.getenv("HF_DEPLOYMENT_NAME"),
-        body_handler=HFContentFormatter()
+        content_formatter=HFContentFormatter()
     )
     output = llm("Foo")
     assert isinstance(output, str)
@@ -35,7 +35,30 @@ def test_dolly_call() -> None:
         endpoint_api_key=os.getenv("DOLLY_ENDPOINT_API_KEY"),
         endpoint_url=os.getenv("DOLLY_ENDPOINT_URL"),
         deployment_name=os.getenv("DOLLY_DEPLOYMENT_NAME"),
-        body_handler=DollyContentFormatter()
+        content_formatter=DollyContentFormatter()
+    )
+    output = llm("Foo")
+    assert isinstance(output, str)
+
+def test_custom_formatter() -> None:
+    """Test ability to create a custom content formatter."""
+    class CustomFormatter(LLMContentFormatter):
+        content_type = "application/json"
+        accepts = "application/json"
+
+        def format_request_payload(self, prompt, model_kwargs) -> bytes:
+            input_str = json.dumps({"inputs": [prompt], "parameters": model_kwargs, "options": {"use_cache": False, "wait_for_model": True}})
+            return input_str.encode("utf-8")
+
+        def format_response_payload(self, output) -> bytes:
+            response_json = json.loads(output)
+            return response_json[0][0]["summary_text"]
+        
+    llm = AzureMLModel(
+        endpoint_api_key=os.getenv("BERT_ENDPOINT_API_KEY"),
+        endpoint_url=os.getenv("BERT_ENDPOINT_URL"),
+        deployment_name=os.getenv("BERT_DEPLOYMENT_NAME"),
+        content_formatter=CustomFormatter()
     )
     output = llm("Foo")
     assert isinstance(output, str)
@@ -69,7 +92,7 @@ def test_invalid_request_format() -> None:
             endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
             endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
             deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
-            body_handler=CustomContentFormatter()  
+            content_formatter=CustomContentFormatter()  
       )
       llm("Foo")
 

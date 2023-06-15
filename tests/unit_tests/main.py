@@ -20,7 +20,7 @@ azure_llm = AzureMLModel(
     endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
     deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
     model_kwargs={"temperature": 0.8},
-    body_handler=OSSBodyHandler()
+    content_formatter=OSSBodyHandler()
 )
 
 # resp = azure_llm("Why is the sky blue?")
