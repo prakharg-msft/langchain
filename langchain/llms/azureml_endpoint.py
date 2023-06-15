@@ -113,7 +113,7 @@ class AzureMLModel(LLM, BaseModel):
 
     http_client: Any = None  #: :meta private:
     
-    body_handler: LLMBodyHandler
+    body_handler: LLMBodyHandler = None
     """The body handler class that provides an input and output
     transform function to handle formats between the LLM and
     the endpoint"""
@@ -161,7 +161,7 @@ class AzureMLModel(LLM, BaseModel):
         _model_kwargs = self.model_kwargs or {}
         return {
             **{"deployment_name": self.deployment_name},
-            **{"model_kwargs": _model_kwargs},
+            **{"model_kwargs": _model_kwargs}
         }
     @property
     def _llm_type(self) -> str:

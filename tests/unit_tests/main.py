@@ -1,4 +1,5 @@
 from langchain.llms.azureml_endpoint import AzureMLModel, LLMBodyHandler
+from langchain.llms.loading import load_llm
 import json
 import os
 
@@ -22,5 +23,6 @@ azure_llm = AzureMLModel(
     model_kwargs={"temperature": 0.8},
     body_handler=OSSBodyHandler()
 )
-resp = azure_llm("Why is the sky blue?")
-print(resp)
+
+# resp = azure_llm("Why is the sky blue?")
+# print(resp)
