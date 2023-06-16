@@ -52,12 +52,12 @@ def test_custom_formatter() -> None:
 
         def format_response_payload(self, output) -> bytes:
             response_json = json.loads(output)
-            return response_json[0][0]["summary_text"]
+            return response_json[0]["summary_text"]
         
     llm = AzureMLModel(
-        endpoint_api_key=os.getenv("BERT_ENDPOINT_API_KEY"),
-        endpoint_url=os.getenv("BERT_ENDPOINT_URL"),
-        deployment_name=os.getenv("BERT_DEPLOYMENT_NAME"),
+        endpoint_api_key=os.getenv("BART_ENDPOINT_API_KEY"),
+        endpoint_url=os.getenv("BART_ENDPOINT_URL"),
+        deployment_name=os.getenv("BART_DEPLOYMENT_NAME"),
         content_formatter=CustomFormatter()
     )
     output = llm("Foo")
