@@ -48,8 +48,7 @@ __all__ = [
     "Anthropic",
     "AlephAlpha",
     "Anyscale",
-    "AzureMLModel"
-    "Banana",
+    "AzureMLModel" "Banana",
     "Beam",
     "Bedrock",
     "CerebriumAI",
