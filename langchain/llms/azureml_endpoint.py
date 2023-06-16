@@ -138,7 +138,7 @@ class AzureMLModel(LLM, BaseModel):
                 endpoint_url="https://<your-endpoint>.<your_region>.inference.ml.azure.com/score",
                 endpoint_api_key="my-api-key",
                 deployment_name="my-deployment-name",
-                body_handler=body_handler)
+                content_formatter=content_formatter)
     """
 
     endpoint_url: str = None
