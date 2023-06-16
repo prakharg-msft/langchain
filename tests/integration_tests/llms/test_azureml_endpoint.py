@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
+from pydantic import ValidationError
 
 from langchain.llms.azureml_endpoint import (
     AzureMLModel,
@@ -84,7 +85,7 @@ def test_custom_formatter() -> None:
     assert isinstance(output, str)
 
 
-def test_missing_body_handler() -> None:
+def test_missing_content_formatter() -> None:
     """Test AzureML LLM without a body_handler attribute"""
     with pytest.raises(AttributeError):
         llm = AzureMLModel(

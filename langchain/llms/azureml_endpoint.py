@@ -4,7 +4,7 @@ import urllib.request
 from abc import abstractmethod
 from typing import Any, Dict, Generic, List, Mapping, Optional, TypeVar, Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Extra, validator
 
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.llms.base import LLM
@@ -172,7 +172,7 @@ class AzureMLModel(LLM, BaseModel):
 
     http_client: Any = None  #: :meta private:
 
-    content_formatter: ContentFormatterBase
+    content_formatter: Any = None
     """The body handler class that provides an input and output
     transform function to handle formats between the LLM and
     the endpoint"""
