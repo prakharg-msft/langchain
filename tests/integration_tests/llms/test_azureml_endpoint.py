@@ -1,6 +1,6 @@
 """Test AzureML Endpoint wrapper."""
 
-from langchain.llms.azureml_endpoint import LLMContentFormatter, AzureMLModel, OSSContentFormatter, HFContentFormatter, DollyContentFormatter
+from langchain.llms.azureml_endpoint import AzureMLModel, ContentFormatterBase, OSSContentFormatter, HFContentFormatter, DollyContentFormatter
 from langchain.llms.loading import load_llm
 
 import pytest
@@ -42,7 +42,7 @@ def test_dolly_call() -> None:
 
 def test_custom_formatter() -> None:
     """Test ability to create a custom content formatter."""
-    class CustomFormatter(LLMContentFormatter):
+    class CustomFormatter(ContentFormatterBase):
         content_type = "application/json"
         accepts = "application/json"
 
@@ -75,7 +75,7 @@ def test_missing_body_handler() -> None:
 
 def test_invalid_request_format() -> None:
     """Test invalid request format."""
-    class CustomContentFormatter(LLMContentFormatter):
+    class CustomContentFormatter(ContentFormatterBase):
             content_type = "application/json"
             accepts = "application/json"
             

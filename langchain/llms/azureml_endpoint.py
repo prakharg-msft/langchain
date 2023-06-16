@@ -86,10 +86,10 @@ class ContentFormatterBase():
         received from the response.
         """
      
-class LLMContentFormatter(ContentFormatterBase):
-    """Content handler for LLM class."""
+# class LLMContentFormatter(ContentFormatterBase):
+#     """Content handler for LLM class."""
 
-class OSSContentFormatter(LLMContentFormatter):
+class OSSContentFormatter(ContentFormatterBase):
     """Content handler for LLMs from the OSS catalog."""
     content_type = "application/json"
     accepts = "application/json"
@@ -102,7 +102,7 @@ class OSSContentFormatter(LLMContentFormatter):
         response_json = json.loads(output)
         return response_json[0]["0"]
     
-class HFContentFormatter(LLMContentFormatter):
+class HFContentFormatter(ContentFormatterBase):
     """Content handler for LLMs from the HuggingFace catalog."""
     content_type = "application/json"
     accepts = "application/json"
@@ -115,7 +115,7 @@ class HFContentFormatter(LLMContentFormatter):
         response_json = json.loads(output)
         return response_json[0][0]["generated_text"]
 
-class DollyContentFormatter(LLMContentFormatter):
+class DollyContentFormatter(ContentFormatterBase):
     """Content handler for the Dolly-v2-12b model"""
     content_type = "application/json"
     accepts = "application/json"
@@ -152,7 +152,7 @@ class AzureMLModel(LLM, BaseModel):
 
     http_client: Any = None  #: :meta private:
     
-    content_formatter: LLMContentFormatter = None
+    content_formatter: ContentFormatterBase = None
     """The body handler class that provides an input and output
     transform function to handle formats between the LLM and
     the endpoint"""
