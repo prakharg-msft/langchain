@@ -3,7 +3,7 @@ import os
 from typing import Any
 
 from langchain.llms.azureml_endpoint import (
-    AzureMLModel,
+    AzureMLOnlineEndpoint,
     ContentFormatterBase,
     OSSContentFormatter,
 )
@@ -38,7 +38,7 @@ class CustomFormatter(ContentFormatterBase):
 #     content_formatter=CustomFormatter(),
 # )
 
-azure_llm = AzureMLModel(
+azure_llm = AzureMLOnlineEndpoint(
     endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
     endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
     deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),

@@ -6,10 +6,9 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
-from pydantic import ValidationError
 
 from langchain.llms.azureml_endpoint import (
-    AzureMLModel,
+    AzureMLOnlineEndpoint,
     ContentFormatterBase,
     DollyContentFormatter,
     HFContentFormatter,
@@ -20,7 +19,7 @@ from langchain.llms.loading import load_llm
 
 def test_oss_call() -> None:
     """Test valid call to Open Source Foundation Model."""
-    llm = AzureMLModel(
+    llm = AzureMLOnlineEndpoint(
         endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
         endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
         deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
@@ -32,7 +31,7 @@ def test_oss_call() -> None:
 
 def test_hf_call() -> None:
     """Test valid call to HuggingFace Foundation Model."""
-    llm = AzureMLModel(
+    llm = AzureMLOnlineEndpoint(
         endpoint_api_key=os.getenv("HF_ENDPOINT_API_KEY"),
         endpoint_url=os.getenv("HF_ENDPOINT_URL"),
         deployment_name=os.getenv("HF_DEPLOYMENT_NAME"),
@@ -44,7 +43,7 @@ def test_hf_call() -> None:
 
 def test_dolly_call() -> None:
     """Test valid call to dolly-v2-12b."""
-    llm = AzureMLModel(
+    llm = AzureMLOnlineEndpoint(
         endpoint_api_key=os.getenv("DOLLY_ENDPOINT_API_KEY"),
         endpoint_url=os.getenv("DOLLY_ENDPOINT_URL"),
         deployment_name=os.getenv("DOLLY_DEPLOYMENT_NAME"),
@@ -75,7 +74,7 @@ def test_custom_formatter() -> None:
             response_json = json.loads(output)
             return response_json[0]["summary_text"]
 
-    llm = AzureMLModel(
+    llm = AzureMLOnlineEndpoint(
         endpoint_api_key=os.getenv("BART_ENDPOINT_API_KEY"),
         endpoint_url=os.getenv("BART_ENDPOINT_URL"),
         deployment_name=os.getenv("BART_DEPLOYMENT_NAME"),
@@ -88,7 +87,7 @@ def test_custom_formatter() -> None:
 def test_missing_content_formatter() -> None:
     """Test AzureML LLM without a body_handler attribute"""
     with pytest.raises(AttributeError):
-        llm = AzureMLModel(
+        llm = AzureMLOnlineEndpoint(
             endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
             endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
             deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
@@ -117,7 +116,7 @@ def test_invalid_request_format() -> None:
             return response_json[0]["0"]
 
     with pytest.raises(json.JSONDecodeError):
-        llm = AzureMLModel(
+        llm = AzureMLOnlineEndpoint(
             endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
             endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
             deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
@@ -129,7 +128,7 @@ def test_invalid_request_format() -> None:
 def test_saving_loading_llm(tmp_path: Path) -> None:
     """Test saving/loading an AzureML Foundation Model LLM."""
 
-    llm = AzureMLModel(
+    llm = AzureMLOnlineEndpoint(
         model_kwargs={"temperature": 0.03, "top_p": 0.4, "max_tokens": 200}
     )
     llm.save(file_path=tmp_path / "azureml.yaml")

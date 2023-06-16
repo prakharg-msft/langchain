@@ -148,7 +148,7 @@ class DollyContentFormatter(ContentFormatterBase[str, str]):
         return response_json[0]
 
 
-class AzureMLModel(LLM, BaseModel):
+class AzureMLOnlineEndpoint(LLM, BaseModel):
     """Wrapper around Azure ML Hosted models using Managed Online Endpoints.
 
     Example:
