@@ -4,7 +4,6 @@ import json
 import os
 from pathlib import Path
 from typing import Dict
-
 import pytest
 
 from langchain.llms.azureml_endpoint import (
@@ -13,6 +12,7 @@ from langchain.llms.azureml_endpoint import (
     DollyContentFormatter,
     HFContentFormatter,
     OSSContentFormatter,
+    AzureMLEndpointClient,
 )
 from langchain.llms.loading import load_llm
 
@@ -125,13 +125,34 @@ def test_invalid_request_format() -> None:
         llm("Foo")
 
 
+def test_incorrect_key() -> None:
+    """Testing AzureML Endpoint for incorrect key"""
+    with pytest.raises(json.JSONDecodeError):
+        llm = AzureMLOnlineEndpoint(
+            endpoint_api_key="incorrect-key",
+            endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
+            deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
+            content_formatter=OSSContentFormatter(),
+        )
+        llm("Foo")
+
+
 def test_saving_loading_llm(tmp_path: Path) -> None:
     """Test saving/loading an AzureML Foundation Model LLM."""
 
     llm = AzureMLOnlineEndpoint(
-        model_kwargs={"temperature": 0.03, "top_p": 0.4, "max_tokens": 200}
+        deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
+        model_kwargs={"temperature": 0.03, "top_p": 0.4, "max_tokens": 200},
     )
     llm.save(file_path=tmp_path / "azureml.yaml")
     loaded_llm = load_llm(tmp_path / "azureml.yaml")
+    loaded_llm.endpoint_url = os.getenv("OSS_ENDPOINT_URL")
+    loaded_llm.endpoint_api_key = os.getenv("OSS_ENDPOINT_API_KEY")
+    loaded_llm.content_formatter = OSSContentFormatter()
+    loaded_llm.http_client = AzureMLEndpointClient(
+        loaded_llm.endpoint_url, loaded_llm.endpoint_api_key, loaded_llm.deployment_name
+    )
+    resp = loaded_llm("Foo")
+    assert isinstance(resp, str)
 
     assert loaded_llm == llm

@@ -1,11 +1,13 @@
 import json
 import os
 from typing import Any
+from langchain.llms.loading import load_llm
 
 from langchain.llms.azureml_endpoint import (
     AzureMLOnlineEndpoint,
     ContentFormatterBase,
     OSSContentFormatter,
+    AzureMLEndpointClient,
 )
 
 
@@ -42,8 +44,20 @@ azure_llm = AzureMLOnlineEndpoint(
     endpoint_url=os.getenv("OSS_ENDPOINT_URL"),
     endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
     deployment_name=os.getenv("OSS_DEPLOYMENT_NAME"),
+    model_kwargs={"temperature": 0.4, "top_p": 0.2, "max_tokens": 100}
     # content_formatter=OSSContentFormatter(),
 )
+
+azure_llm.save("azure_llm.json")
+loaded = load_llm("azure_llm.json")
+loaded.endpoint_url = os.getenv("OSS_ENDPOINT_URL")
+loaded.endpoint_api_key = os.getenv("OSS_ENDPOINT_API_KEY")
+loaded.content_formatter = OSSContentFormatter()
+loaded.http_client = AzureMLEndpointClient(
+    loaded.endpoint_url, loaded.endpoint_api_key, loaded.deployment_name
+)
+print(loaded("Foo"))
+# print(new_llm("Write an essay on flowers. Essay: "))
 # resp = azure_llm("Question: What is the color of the sky? Answer: ")
 # resp = azure_llm("Write an essay on flowers.")
 # print("Response: ", resp)
