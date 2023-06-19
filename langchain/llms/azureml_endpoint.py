@@ -14,7 +14,6 @@ INPUT_TYPE = TypeVar("INPUT_TYPE", bound=Union[str, List[str]])
 OUTPUT_TYPE = TypeVar("OUTPUT_TYPE", bound=Union[str, List[List[float]]])
 
 
-# TODO: Use python SDK instead of urllib
 class AzureMLEndpointClient(object):
     """Wrapper around AzureML Managed Online Endpoint Client."""
 
