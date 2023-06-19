@@ -12,7 +12,6 @@ from langchain.base_language import BaseLanguageModel
 from langchain.callbacks.manager import (
     AsyncCallbackManagerForChainRun,
     CallbackManagerForChainRun,
-    Callbacks,
 )
 from langchain.chains.base import Chain
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
@@ -57,7 +56,6 @@ class BaseConversationalRetrievalChain(Chain):
     question_generator: LLMChain
     output_key: str = "answer"
     return_source_documents: bool = False
-    return_generated_question: bool = False
     get_chat_history: Optional[Callable[[CHAT_TURN_TYPE], str]] = None
     """Return the source documents."""
 
@@ -82,8 +80,6 @@ class BaseConversationalRetrievalChain(Chain):
         _output_keys = [self.output_key]
         if self.return_source_documents:
             _output_keys = _output_keys + ["source_documents"]
-        if self.return_generated_question:
-            _output_keys = _output_keys + ["generated_question"]
         return _output_keys
 
     @abstractmethod
@@ -114,12 +110,10 @@ class BaseConversationalRetrievalChain(Chain):
         answer = self.combine_docs_chain.run(
             input_documents=docs, callbacks=_run_manager.get_child(), **new_inputs
         )
-        output: Dict[str, Any] = {self.output_key: answer}
         if self.return_source_documents:
-            output["source_documents"] = docs
-        if self.return_generated_question:
-            output["generated_question"] = new_question
-        return output
+            return {self.output_key: answer, "source_documents": docs}
+        else:
+            return {self.output_key: answer}
 
     @abstractmethod
     async def _aget_docs(self, question: str, inputs: Dict[str, Any]) -> List[Document]:
@@ -148,12 +142,10 @@ class BaseConversationalRetrievalChain(Chain):
         answer = await self.combine_docs_chain.arun(
             input_documents=docs, callbacks=_run_manager.get_child(), **new_inputs
         )
-        output: Dict[str, Any] = {self.output_key: answer}
         if self.return_source_documents:
-            output["source_documents"] = docs
-        if self.return_generated_question:
-            output["generated_question"] = new_question
-        return output
+            return {self.output_key: answer, "source_documents": docs}
+        else:
+            return {self.output_key: answer}
 
     def save(self, file_path: Union[Path, str]) -> None:
         if self.get_chat_history:
@@ -205,7 +197,6 @@ class ConversationalRetrievalChain(BaseConversationalRetrievalChain):
         verbose: bool = False,
         condense_question_llm: Optional[BaseLanguageModel] = None,
         combine_docs_chain_kwargs: Optional[Dict] = None,
-        callbacks: Callbacks = None,
         **kwargs: Any,
     ) -> BaseConversationalRetrievalChain:
         """Load chain from LLM."""
@@ -214,22 +205,17 @@ class ConversationalRetrievalChain(BaseConversationalRetrievalChain):
             llm,
             chain_type=chain_type,
             verbose=verbose,
-            callbacks=callbacks,
             **combine_docs_chain_kwargs,
         )
 
         _llm = condense_question_llm or llm
         condense_question_chain = LLMChain(
-            llm=_llm,
-            prompt=condense_question_prompt,
-            verbose=verbose,
-            callbacks=callbacks,
+            llm=_llm, prompt=condense_question_prompt, verbose=verbose
         )
         return cls(
             retriever=retriever,
             combine_docs_chain=doc_chain,
             question_generator=condense_question_chain,
-            callbacks=callbacks,
             **kwargs,
         )
 
@@ -271,7 +257,6 @@ class ChatVectorDBChain(BaseConversationalRetrievalChain):
         condense_question_prompt: BasePromptTemplate = CONDENSE_QUESTION_PROMPT,
         chain_type: str = "stuff",
         combine_docs_chain_kwargs: Optional[Dict] = None,
-        callbacks: Callbacks = None,
         **kwargs: Any,
     ) -> BaseConversationalRetrievalChain:
         """Load chain from LLM."""
@@ -279,16 +264,12 @@ class ChatVectorDBChain(BaseConversationalRetrievalChain):
         doc_chain = load_qa_chain(
             llm,
             chain_type=chain_type,
-            callbacks=callbacks,
             **combine_docs_chain_kwargs,
         )
-        condense_question_chain = LLMChain(
-            llm=llm, prompt=condense_question_prompt, callbacks=callbacks
-        )
+        condense_question_chain = LLMChain(llm=llm, prompt=condense_question_prompt)
         return cls(
             vectorstore=vectorstore,
             combine_docs_chain=doc_chain,
             question_generator=condense_question_chain,
-            callbacks=callbacks,
             **kwargs,
         )

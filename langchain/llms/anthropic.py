@@ -162,7 +162,6 @@ class Anthropic(LLM, _AnthropicCommon):
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> str:
         r"""Call out to Anthropic's completion endpoint.
 
@@ -182,12 +181,11 @@ class Anthropic(LLM, _AnthropicCommon):
 
         """
         stop = self._get_anthropic_stop(stop)
-        params = {**self._default_params, **kwargs}
         if self.streaming:
             stream_resp = self.client.completion_stream(
                 prompt=self._wrap_prompt(prompt),
                 stop_sequences=stop,
-                **params,
+                **self._default_params,
             )
             current_completion = ""
             for data in stream_resp:
@@ -199,7 +197,7 @@ class Anthropic(LLM, _AnthropicCommon):
         response = self.client.completion(
             prompt=self._wrap_prompt(prompt),
             stop_sequences=stop,
-            **params,
+            **self._default_params,
         )
         return response["completion"]
 
@@ -208,16 +206,14 @@ class Anthropic(LLM, _AnthropicCommon):
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> str:
         """Call out to Anthropic's completion endpoint asynchronously."""
         stop = self._get_anthropic_stop(stop)
-        params = {**self._default_params, **kwargs}
         if self.streaming:
             stream_resp = await self.client.acompletion_stream(
                 prompt=self._wrap_prompt(prompt),
                 stop_sequences=stop,
-                **params,
+                **self._default_params,
             )
             current_completion = ""
             async for data in stream_resp:
@@ -229,7 +225,7 @@ class Anthropic(LLM, _AnthropicCommon):
         response = await self.client.acompletion(
             prompt=self._wrap_prompt(prompt),
             stop_sequences=stop,
-            **params,
+            **self._default_params,
         )
         return response["completion"]
 

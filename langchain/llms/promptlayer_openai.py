@@ -1,6 +1,6 @@
 """PromptLayer wrapper."""
 import datetime
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from langchain.callbacks.manager import (
     AsyncCallbackManagerForLLMRun,
@@ -42,7 +42,6 @@ class PromptLayerOpenAI(OpenAI):
         prompts: List[str],
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> LLMResult:
         """Call OpenAI generate and then call PromptLayer API to log the request."""
         from promptlayer.utils import get_api_key, promptlayer_api_request
@@ -57,12 +56,11 @@ class PromptLayerOpenAI(OpenAI):
                 "text": generation.text,
                 "llm_output": generated_responses.llm_output,
             }
-            params = {**self._identifying_params, **kwargs}
             pl_request_id = promptlayer_api_request(
                 "langchain.PromptLayerOpenAI",
                 "langchain",
                 [prompt],
-                params,
+                self._identifying_params,
                 self.pl_tags,
                 resp,
                 request_start_time,
@@ -83,7 +81,6 @@ class PromptLayerOpenAI(OpenAI):
         prompts: List[str],
         stop: Optional[List[str]] = None,
         run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> LLMResult:
         from promptlayer.utils import get_api_key, promptlayer_api_request_async
 
@@ -97,12 +94,11 @@ class PromptLayerOpenAI(OpenAI):
                 "text": generation.text,
                 "llm_output": generated_responses.llm_output,
             }
-            params = {**self._identifying_params, **kwargs}
             pl_request_id = await promptlayer_api_request_async(
                 "langchain.PromptLayerOpenAI.async",
                 "langchain",
                 [prompt],
-                params,
+                self._identifying_params,
                 self.pl_tags,
                 resp,
                 request_start_time,
@@ -151,7 +147,6 @@ class PromptLayerOpenAIChat(OpenAIChat):
         prompts: List[str],
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> LLMResult:
         """Call OpenAI generate and then call PromptLayer API to log the request."""
         from promptlayer.utils import get_api_key, promptlayer_api_request
@@ -166,12 +161,11 @@ class PromptLayerOpenAIChat(OpenAIChat):
                 "text": generation.text,
                 "llm_output": generated_responses.llm_output,
             }
-            params = {**self._identifying_params, **kwargs}
             pl_request_id = promptlayer_api_request(
                 "langchain.PromptLayerOpenAIChat",
                 "langchain",
                 [prompt],
-                params,
+                self._identifying_params,
                 self.pl_tags,
                 resp,
                 request_start_time,
@@ -192,7 +186,6 @@ class PromptLayerOpenAIChat(OpenAIChat):
         prompts: List[str],
         stop: Optional[List[str]] = None,
         run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> LLMResult:
         from promptlayer.utils import get_api_key, promptlayer_api_request_async
 
@@ -206,12 +199,11 @@ class PromptLayerOpenAIChat(OpenAIChat):
                 "text": generation.text,
                 "llm_output": generated_responses.llm_output,
             }
-            params = {**self._identifying_params, **kwargs}
             pl_request_id = await promptlayer_api_request_async(
                 "langchain.PromptLayerOpenAIChat.async",
                 "langchain",
                 [prompt],
-                params,
+                self._identifying_params,
                 self.pl_tags,
                 resp,
                 request_start_time,

@@ -34,7 +34,6 @@ from langchain.tools.requests.tool import (
 from langchain.tools.scenexplain.tool import SceneXplainTool
 from langchain.tools.searx_search.tool import SearxSearchResults, SearxSearchRun
 from langchain.tools.shell.tool import ShellTool
-from langchain.tools.sleep.tool import SleepTool
 from langchain.tools.wikipedia.tool import WikipediaQueryRun
 from langchain.tools.wolfram_alpha.tool import WolframAlphaQueryRun
 from langchain.tools.openweathermap.tool import OpenWeatherMapQueryRun
@@ -83,10 +82,6 @@ def _get_terminal() -> BaseTool:
     return ShellTool()
 
 
-def _get_sleep() -> BaseTool:
-    return SleepTool()
-
-
 _BASE_TOOLS: Dict[str, Callable[[], BaseTool]] = {
     "python_repl": _get_python_repl,
     "requests": _get_tools_requests_get,  # preserved for backwards compatability
@@ -96,7 +91,6 @@ _BASE_TOOLS: Dict[str, Callable[[], BaseTool]] = {
     "requests_put": _get_tools_requests_put,
     "requests_delete": _get_tools_requests_delete,
     "terminal": _get_terminal,
-    "sleep": _get_sleep,
 }
 
 

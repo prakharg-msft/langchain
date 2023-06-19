@@ -117,7 +117,6 @@ class NLPCloud(LLM):
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> str:
         """Call out to NLPCloud's create endpoint.
 
@@ -142,6 +141,7 @@ class NLPCloud(LLM):
             end_sequence = stop[0]
         else:
             end_sequence = None
-        params = {**self._default_params, **kwargs}
-        response = self.client.generation(prompt, end_sequence=end_sequence, **params)
+        response = self.client.generation(
+            prompt, end_sequence=end_sequence, **self._default_params
+        )
         return response["generated_text"]

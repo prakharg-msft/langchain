@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional, Sequence, Set
+from typing import List, Optional, Sequence, Set
+
+from pydantic import BaseModel
 
 from langchain.callbacks.manager import Callbacks
-from langchain.load.serializable import Serializable
 from langchain.schema import BaseMessage, LLMResult, PromptValue, get_buffer_string
 
 
@@ -28,14 +29,13 @@ def _get_token_ids_default_method(text: str) -> List[int]:
     return tokenizer.encode(text)
 
 
-class BaseLanguageModel(Serializable, ABC):
+class BaseLanguageModel(BaseModel, ABC):
     @abstractmethod
     def generate_prompt(
         self,
         prompts: List[PromptValue],
         stop: Optional[List[str]] = None,
         callbacks: Callbacks = None,
-        **kwargs: Any,
     ) -> LLMResult:
         """Take in a list of prompt values and return an LLMResult."""
 
@@ -45,39 +45,26 @@ class BaseLanguageModel(Serializable, ABC):
         prompts: List[PromptValue],
         stop: Optional[List[str]] = None,
         callbacks: Callbacks = None,
-        **kwargs: Any,
     ) -> LLMResult:
         """Take in a list of prompt values and return an LLMResult."""
 
     @abstractmethod
-    def predict(
-        self, text: str, *, stop: Optional[Sequence[str]] = None, **kwargs: Any
-    ) -> str:
+    def predict(self, text: str, *, stop: Optional[Sequence[str]] = None) -> str:
         """Predict text from text."""
 
     @abstractmethod
     def predict_messages(
-        self,
-        messages: List[BaseMessage],
-        *,
-        stop: Optional[Sequence[str]] = None,
-        **kwargs: Any,
+        self, messages: List[BaseMessage], *, stop: Optional[Sequence[str]] = None
     ) -> BaseMessage:
         """Predict message from messages."""
 
     @abstractmethod
-    async def apredict(
-        self, text: str, *, stop: Optional[Sequence[str]] = None, **kwargs: Any
-    ) -> str:
+    async def apredict(self, text: str, *, stop: Optional[Sequence[str]] = None) -> str:
         """Predict text from text."""
 
     @abstractmethod
     async def apredict_messages(
-        self,
-        messages: List[BaseMessage],
-        *,
-        stop: Optional[Sequence[str]] = None,
-        **kwargs: Any,
+        self, messages: List[BaseMessage], *, stop: Optional[Sequence[str]] = None
     ) -> BaseMessage:
         """Predict message from messages."""
 

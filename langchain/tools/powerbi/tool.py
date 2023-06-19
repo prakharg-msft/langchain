@@ -1,5 +1,4 @@
 """Tools for interacting with a Power BI dataset."""
-import logging
 from typing import Any, Dict, Optional, Tuple
 
 from pydantic import Field, validator
@@ -17,8 +16,6 @@ from langchain.tools.powerbi.prompt import (
     RETRY_RESPONSE,
 )
 from langchain.utilities.powerbi import PowerBIDataset, json_to_md
-
-logger = logging.getLogger(__name__)
 
 
 class QueryPowerBITool(BaseTool):
@@ -76,11 +73,9 @@ class QueryPowerBITool(BaseTool):
     ) -> str:
         """Execute the query, return the results or an error message."""
         if cache := self._check_cache(tool_input):
-            logger.debug("Found cached result for %s: %s", tool_input, cache)
             return cache
 
         try:
-            logger.info("Running PBI Query Tool with input: %s", tool_input)
             query = self.llm_chain.predict(
                 tool_input=tool_input,
                 tables=self.powerbi.get_table_names(),
@@ -93,7 +88,6 @@ class QueryPowerBITool(BaseTool):
         if query == "I cannot answer this":
             self.session_cache[tool_input] = query
             return self.session_cache[tool_input]
-        logger.info("Query: %s", query)
         pbi_result = self.powerbi.run(command=query)
         result, error = self._parse_output(pbi_result)
 
@@ -120,10 +114,8 @@ class QueryPowerBITool(BaseTool):
     ) -> str:
         """Execute the query, return the results or an error message."""
         if cache := self._check_cache(tool_input):
-            logger.debug("Found cached result for %s: %s", tool_input, cache)
             return cache
         try:
-            logger.info("Running PBI Query Tool with input: %s", tool_input)
             query = await self.llm_chain.apredict(
                 tool_input=tool_input,
                 tables=self.powerbi.get_table_names(),
@@ -137,7 +129,6 @@ class QueryPowerBITool(BaseTool):
         if query == "I cannot answer this":
             self.session_cache[tool_input] = query
             return self.session_cache[tool_input]
-        logger.info("Query: %s", query)
         pbi_result = await self.powerbi.arun(command=query)
         result, error = self._parse_output(pbi_result)
 

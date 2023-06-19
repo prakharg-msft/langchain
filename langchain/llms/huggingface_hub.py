@@ -91,7 +91,6 @@ class HuggingFaceHub(LLM):
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> str:
         """Call out to HuggingFace Hub's inference endpoint.
 
@@ -108,8 +107,7 @@ class HuggingFaceHub(LLM):
                 response = hf("Tell me a joke.")
         """
         _model_kwargs = self.model_kwargs or {}
-        params = {**_model_kwargs, **kwargs}
-        response = self.client(inputs=prompt, params=params)
+        response = self.client(inputs=prompt, params=_model_kwargs)
         if "error" in response:
             raise ValueError(f"Error raised by inference API: {response['error']}")
         if self.client.task == "text-generation":

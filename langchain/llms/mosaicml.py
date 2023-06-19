@@ -102,7 +102,6 @@ class MosaicML(LLM):
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
         is_retry: bool = False,
-        **kwargs: Any,
     ) -> str:
         """Call out to a MosaicML LLM inference endpoint.
 
@@ -124,7 +123,6 @@ class MosaicML(LLM):
 
         payload = {"input_strings": [prompt]}
         payload.update(_model_kwargs)
-        payload.update(kwargs)
 
         # HTTP headers for authorization
         headers = {

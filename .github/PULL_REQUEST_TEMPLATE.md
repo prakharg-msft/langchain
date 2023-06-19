@@ -48,7 +48,7 @@ Tag maintainers/contributors who might be interested:
   - @agola11
 
   Agents / Tools / Toolkits
-  - @hwchase17
+  - @vowelparrot
 
   VectorStores / Retrievers / Memory
   - @dev2049

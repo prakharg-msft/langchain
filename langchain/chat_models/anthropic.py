@@ -44,10 +44,6 @@ class ChatAnthropic(BaseChatModel, _AnthropicCommon):
         """Return type of chat model."""
         return "anthropic-chat"
 
-    @property
-    def lc_serializable(self) -> bool:
-        return True
-
     def _convert_one_message_to_text(self, message: BaseMessage) -> str:
         if isinstance(message, ChatMessage):
             message_text = f"\n\n{message.role.capitalize()}: {message.content}"
@@ -98,10 +94,9 @@ class ChatAnthropic(BaseChatModel, _AnthropicCommon):
         messages: List[BaseMessage],
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> ChatResult:
         prompt = self._convert_messages_to_prompt(messages)
-        params: Dict[str, Any] = {"prompt": prompt, **self._default_params, **kwargs}
+        params: Dict[str, Any] = {"prompt": prompt, **self._default_params}
         if stop:
             params["stop_sequences"] = stop
 
@@ -126,10 +121,9 @@ class ChatAnthropic(BaseChatModel, _AnthropicCommon):
         messages: List[BaseMessage],
         stop: Optional[List[str]] = None,
         run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> ChatResult:
         prompt = self._convert_messages_to_prompt(messages)
-        params: Dict[str, Any] = {"prompt": prompt, **self._default_params, **kwargs}
+        params: Dict[str, Any] = {"prompt": prompt, **self._default_params}
         if stop:
             params["stop_sequences"] = stop
 

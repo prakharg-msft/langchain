@@ -28,7 +28,7 @@ class AzureCogsImageAnalysisTool(BaseTool):
     vision_service: Any  #: :meta private:
     analysis_options: Any  #: :meta private:
 
-    name = "azure_cognitive_services_image_analysis"
+    name = "Azure Cognitive Services Image Analysis"
     description = (
         "A wrapper around Azure Cognitive Services Image Analysis. "
         "Useful for when you need to analyze images. "

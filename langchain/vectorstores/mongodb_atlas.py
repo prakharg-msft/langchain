@@ -262,7 +262,7 @@ class MongoDBAtlasVectorSearch(VectorStore):
                     collection=collection
                 )
         """
-        if collection is None:
+        if not collection:
             raise ValueError("Must provide 'collection' named parameter.")
         vecstore = cls(collection, embedding, **kwargs)
         vecstore.add_texts(texts, metadatas=metadatas)

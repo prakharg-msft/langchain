@@ -86,7 +86,6 @@ class StochasticAI(LLM):
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> str:
         """Call out to StochasticAI's complete endpoint.
 
@@ -103,7 +102,6 @@ class StochasticAI(LLM):
                 response = StochasticAI("Tell me a joke.")
         """
         params = self.model_kwargs or {}
-        params = {**params, **kwargs}
         response_post = requests.post(
             url=self.api_url,
             json={"prompt": prompt, "params": params},

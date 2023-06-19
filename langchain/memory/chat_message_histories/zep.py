@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from langchain.schema import (
     AIMessage,
@@ -11,7 +11,7 @@ from langchain.schema import (
 )
 
 if TYPE_CHECKING:
-    from zep_python import Memory, MemorySearchResult, Message, NotFoundError
+    from zep_python import Memory, Message, NotFoundError, SearchResult
 
 logger = logging.getLogger(__name__)
 
@@ -130,15 +130,11 @@ class ZepChatMessageHistory(BaseChatMessageHistory):
 
         self.zep_client.add_memory(self.session_id, zep_memory)
 
-    def search(
-        self, query: str, metadata: Optional[Dict] = None, limit: Optional[int] = None
-    ) -> List[MemorySearchResult]:
+    def search(self, query: str, limit: Optional[int] = None) -> List[SearchResult]:
         """Search Zep memory for messages matching the query"""
-        from zep_python import MemorySearchPayload
+        from zep_python import SearchPayload
 
-        payload: MemorySearchPayload = MemorySearchPayload(
-            text=query, metadata=metadata
-        )
+        payload: SearchPayload = SearchPayload(text=query)
 
         return self.zep_client.search_memory(self.session_id, payload, limit=limit)
 

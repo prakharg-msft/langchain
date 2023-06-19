@@ -14,7 +14,7 @@ from langchain.utilities.searx_search import SearxSearchWrapper
 class SearxSearchRun(BaseTool):
     """Tool that adds the capability to query a Searx instance."""
 
-    name = "searx_search"
+    name = "Searx Search"
     description = (
         "A meta search engine."
         "Useful for when you need to answer questions about current events."

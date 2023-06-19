@@ -20,10 +20,6 @@ class LLMInputOutputAdapter:
         input_body = {**model_kwargs}
         if provider == "anthropic" or provider == "ai21":
             input_body["prompt"] = prompt
-        elif provider == "amazon":
-            input_body = dict()
-            input_body["inputText"] = prompt
-            input_body["textGenerationConfig"] = {**model_kwargs}
         else:
             input_body["inputText"] = prompt
 
@@ -155,7 +151,6 @@ class Bedrock(LLM):
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> str:
         """Call out to Bedrock service model.
 
@@ -174,8 +169,10 @@ class Bedrock(LLM):
         _model_kwargs = self.model_kwargs or {}
 
         provider = self.model_id.split(".")[0]
-        params = {**_model_kwargs, **kwargs}
-        input_body = LLMInputOutputAdapter.prepare_input(provider, prompt, params)
+
+        input_body = LLMInputOutputAdapter.prepare_input(
+            provider, prompt, _model_kwargs
+        )
         body = json.dumps(input_body)
         accept = "application/json"
         contentType = "application/json"

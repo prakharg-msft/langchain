@@ -13,9 +13,6 @@ from langchain.callbacks.tracers.base import BaseTracer, TracerException
 from langchain.callbacks.tracers.schemas import Run
 from langchain.schema import LLMResult
 
-SERIALIZED = {"id": ["llm"]}
-SERIALIZED_CHAT = {"id": ["chat_model"]}
-
 
 class FakeTracer(BaseTracer):
     """Fake tracer that records LangChain execution."""
@@ -42,7 +39,7 @@ def test_tracer_llm_run() -> None:
         extra={},
         execution_order=1,
         child_execution_order=1,
-        serialized=SERIALIZED,
+        serialized={"name": "llm"},
         inputs={"prompts": []},
         outputs=LLMResult(generations=[[]]),
         error=None,
@@ -50,7 +47,7 @@ def test_tracer_llm_run() -> None:
     )
     tracer = FakeTracer()
 
-    tracer.on_llm_start(serialized=SERIALIZED, prompts=[], run_id=uuid)
+    tracer.on_llm_start(serialized={"name": "llm"}, prompts=[], run_id=uuid)
     tracer.on_llm_end(response=LLMResult(generations=[[]]), run_id=uuid)
     assert tracer.runs == [compare_run]
 
@@ -67,7 +64,7 @@ def test_tracer_chat_model_run() -> None:
         extra={},
         execution_order=1,
         child_execution_order=1,
-        serialized=SERIALIZED_CHAT,
+        serialized={"name": "chat_model"},
         inputs=dict(prompts=[""]),
         outputs=LLMResult(generations=[[]]),
         error=None,
@@ -76,7 +73,7 @@ def test_tracer_chat_model_run() -> None:
     tracer = FakeTracer()
     manager = CallbackManager(handlers=[tracer])
     run_manager = manager.on_chat_model_start(
-        serialized=SERIALIZED_CHAT, messages=[[]], run_id=uuid
+        serialized={"name": "chat_model"}, messages=[[]], run_id=uuid
     )
     run_manager.on_llm_end(response=LLMResult(generations=[[]]))
     assert tracer.runs == [compare_run]
@@ -103,7 +100,7 @@ def test_tracer_multiple_llm_runs() -> None:
         extra={},
         execution_order=1,
         child_execution_order=1,
-        serialized=SERIALIZED,
+        serialized={"name": "llm"},
         inputs=dict(prompts=[]),
         outputs=LLMResult(generations=[[]]),
         error=None,
@@ -113,7 +110,7 @@ def test_tracer_multiple_llm_runs() -> None:
 
     num_runs = 10
     for _ in range(num_runs):
-        tracer.on_llm_start(serialized=SERIALIZED, prompts=[], run_id=uuid)
+        tracer.on_llm_start(serialized={"name": "llm"}, prompts=[], run_id=uuid)
         tracer.on_llm_end(response=LLMResult(generations=[[]]), run_id=uuid)
 
     assert tracer.runs == [compare_run] * num_runs
@@ -186,7 +183,7 @@ def test_tracer_nested_run() -> None:
             parent_run_id=chain_uuid,
         )
         tracer.on_llm_start(
-            serialized=SERIALIZED,
+            serialized={"name": "llm"},
             prompts=[],
             run_id=llm_uuid1,
             parent_run_id=tool_uuid,
@@ -194,7 +191,7 @@ def test_tracer_nested_run() -> None:
         tracer.on_llm_end(response=LLMResult(generations=[[]]), run_id=llm_uuid1)
         tracer.on_tool_end("test", run_id=tool_uuid)
         tracer.on_llm_start(
-            serialized=SERIALIZED,
+            serialized={"name": "llm"},
             prompts=[],
             run_id=llm_uuid2,
             parent_run_id=chain_uuid,
@@ -238,7 +235,7 @@ def test_tracer_nested_run() -> None:
                         extra={},
                         execution_order=3,
                         child_execution_order=3,
-                        serialized=SERIALIZED,
+                        serialized={"name": "llm"},
                         inputs=dict(prompts=[]),
                         outputs=LLMResult(generations=[[]]),
                         run_type="llm",
@@ -254,7 +251,7 @@ def test_tracer_nested_run() -> None:
                 extra={},
                 execution_order=4,
                 child_execution_order=4,
-                serialized=SERIALIZED,
+                serialized={"name": "llm"},
                 inputs=dict(prompts=[]),
                 outputs=LLMResult(generations=[[]]),
                 run_type="llm",
@@ -278,7 +275,7 @@ def test_tracer_llm_run_on_error() -> None:
         extra={},
         execution_order=1,
         child_execution_order=1,
-        serialized=SERIALIZED,
+        serialized={"name": "llm"},
         inputs=dict(prompts=[]),
         outputs=None,
         error=repr(exception),
@@ -286,7 +283,7 @@ def test_tracer_llm_run_on_error() -> None:
     )
     tracer = FakeTracer()
 
-    tracer.on_llm_start(serialized=SERIALIZED, prompts=[], run_id=uuid)
+    tracer.on_llm_start(serialized={"name": "llm"}, prompts=[], run_id=uuid)
     tracer.on_llm_error(exception, run_id=uuid)
     assert tracer.runs == [compare_run]
 
@@ -361,14 +358,14 @@ def test_tracer_nested_runs_on_error() -> None:
             serialized={"name": "chain"}, inputs={}, run_id=chain_uuid
         )
         tracer.on_llm_start(
-            serialized=SERIALIZED,
+            serialized={"name": "llm"},
             prompts=[],
             run_id=llm_uuid1,
             parent_run_id=chain_uuid,
         )
         tracer.on_llm_end(response=LLMResult(generations=[[]]), run_id=llm_uuid1)
         tracer.on_llm_start(
-            serialized=SERIALIZED,
+            serialized={"name": "llm"},
             prompts=[],
             run_id=llm_uuid2,
             parent_run_id=chain_uuid,
@@ -381,7 +378,7 @@ def test_tracer_nested_runs_on_error() -> None:
             parent_run_id=chain_uuid,
         )
         tracer.on_llm_start(
-            serialized=SERIALIZED,
+            serialized={"name": "llm"},
             prompts=[],
             run_id=llm_uuid3,
             parent_run_id=tool_uuid,
@@ -411,7 +408,7 @@ def test_tracer_nested_runs_on_error() -> None:
                 extra={},
                 execution_order=2,
                 child_execution_order=2,
-                serialized=SERIALIZED,
+                serialized={"name": "llm"},
                 error=None,
                 inputs=dict(prompts=[]),
                 outputs=LLMResult(generations=[[]], llm_output=None),
@@ -425,7 +422,7 @@ def test_tracer_nested_runs_on_error() -> None:
                 extra={},
                 execution_order=3,
                 child_execution_order=3,
-                serialized=SERIALIZED,
+                serialized={"name": "llm"},
                 error=None,
                 inputs=dict(prompts=[]),
                 outputs=LLMResult(generations=[[]], llm_output=None),
@@ -453,7 +450,7 @@ def test_tracer_nested_runs_on_error() -> None:
                         extra={},
                         execution_order=5,
                         child_execution_order=5,
-                        serialized=SERIALIZED,
+                        serialized={"name": "llm"},
                         error=repr(exception),
                         inputs=dict(prompts=[]),
                         outputs=None,

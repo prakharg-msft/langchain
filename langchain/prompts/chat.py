@@ -5,9 +5,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Callable, List, Sequence, Tuple, Type, TypeVar, Union
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from langchain.load.serializable import Serializable
 from langchain.memory.buffer import get_buffer_string
 from langchain.prompts.base import BasePromptTemplate, StringPromptTemplate
 from langchain.prompts.prompt import PromptTemplate
@@ -21,11 +20,7 @@ from langchain.schema import (
 )
 
 
-class BaseMessagePromptTemplate(Serializable, ABC):
-    @property
-    def lc_serializable(self) -> bool:
-        return True
-
+class BaseMessagePromptTemplate(BaseModel, ABC):
     @abstractmethod
     def format_messages(self, **kwargs: Any) -> List[BaseMessage]:
         """To messages."""
@@ -225,7 +220,7 @@ class ChatPromptTemplate(BaseChatPromptTemplate, ABC):
 
     @property
     def _prompt_type(self) -> str:
-        return "chat"
+        raise NotImplementedError
 
     def save(self, file_path: Union[Path, str]) -> None:
         raise NotImplementedError

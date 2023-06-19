@@ -81,7 +81,6 @@ class CTransformers(LLM):
         prompt: str,
         stop: Optional[Sequence[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
     ) -> str:
         """Generate text from a prompt.
 

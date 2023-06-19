@@ -164,7 +164,7 @@ class ZapierNLAListActions(BaseTool):
 
     """
 
-    name = "ZapierNLA_list_actions"
+    name = "Zapier NLA: List Actions"
     description = BASE_ZAPIER_TOOL_PROMPT + (
         "This tool returns a list of the user's exposed actions."
     )
