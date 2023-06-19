@@ -58,8 +58,8 @@ class AzureMLEndpointClient(object):
 
 
 class ContentFormatterBase(Generic[INPUT_TYPE, OUTPUT_TYPE]):
-    """A handler class to transform input from LLM to
-    a format that AzureML endpoint expects.
+    """A handler class to transform request and response of
+    AzureML endpoint to match with required schema.
     """
 
     """
@@ -173,29 +173,9 @@ class AzureMLOnlineEndpoint(LLM, BaseModel):
     http_client: Any = None  #: :meta private:
 
     content_formatter: Any = None
-    """The body handler class that provides an input and output
+    """The content formatter that provides an input and output
     transform function to handle formats between the LLM and
     the endpoint"""
-
-    """
-        Example:
-            .. code-block:: python
-
-            from langchain.llms.azureml_endpoint import LLMBodyHandler
-
-            class BodyHandler(LLMBodyHandler):
-                content_type = "application/json"
-                accepts = "application/json"
-                
-                def format_request_payload(self, prompt, model_kwargs) -> bytes:
-                    input_str = json.dumps({"inputs": {"input_string": [prompt]}, "parameters": model_kwargs})
-                    return str.encode(input_str)
-
-                def format_response_payload(self, output) -> str:
-                    response_json = json.loads(output)
-                    return response_json[0]["0"]
-                    
-    """
 
     model_kwargs: Optional[dict] = None
     """Key word arguments to pass to the model."""
@@ -251,5 +231,4 @@ class AzureMLOnlineEndpoint(LLM, BaseModel):
         body = self.content_formatter.format_request_payload(prompt, _model_kwargs)
         endpoint_response = self.http_client.call(body)
         response = self.content_formatter.format_response_payload(endpoint_response)
-        # TODO: Add error handling
         return response

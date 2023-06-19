@@ -85,7 +85,7 @@ def test_custom_formatter() -> None:
 
 
 def test_missing_content_formatter() -> None:
-    """Test AzureML LLM without a body_handler attribute"""
+    """Test AzureML LLM without a content_formatter attribute"""
     with pytest.raises(AttributeError):
         llm = AzureMLOnlineEndpoint(
             endpoint_api_key=os.getenv("OSS_ENDPOINT_API_KEY"),
